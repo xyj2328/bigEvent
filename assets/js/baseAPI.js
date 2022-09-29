@@ -11,7 +11,7 @@ $.ajaxPerfilter(function(config){
     return JSON.stringify(target)
   }
   // 统一设置基准地址
-  config.url = 'http://big-event-vue-api-t.itheima.net' + config.url
+  // config.url = 'http://big-event-vue-api-t.itheima.net' + config.url
   config.contentType = 'application/json'
   config.data = format2Json(config.data)
 })
