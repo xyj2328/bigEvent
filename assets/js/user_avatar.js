@@ -65,7 +65,7 @@ $(function () {
   // 当用户选择了文件，会触发 change 事件
   $('#file').on('change', function (e) {
     const fileList = e.target.files // 伪数组
-    if (fileList.length === 0) return layer, msg('请选择图片')
+    if (fileList.length === 0) return layer.msg('请选择图片')
 
     // 需要转成 blob 格式的图片对象
     const blobUrl = URL.createObjectURL(fileList[0])
@@ -87,7 +87,7 @@ $(function () {
       })
       .toDataURL('image/png') // 将 Canvas 画布上的内容，转化为 base64 格式的字符串
     // base64 格式的字符串（就是你选中的那一小块图片）
-    debugger
+    
     $.ajax({
       method: 'PATCH',
       url: '/my/update/avatar',
