@@ -1,17 +1,44 @@
-// 每次发起真正的请求之后，都会经过
-
-$.ajaxPerfilter(function(config){
+// 注意每次调用$.get()或$.post()或 $.ajax() 的时候，
+// 会先调用ajaxPerfilter这个函数
+// 在这个函数中，可以拿到我们给ajax提供的配置对象
+$.ajaxPrefilter(function (config) {
   // 将key-value形式的数据，转成json格式
   const format2Json = (source) => {
     let target = {}
     source.split('&').forEach((el) => {
       let kv = el.split('=')
-      target[kv[0]] = kv[1]
+      target[kv[0]] = decodeURIComponent(kv[1])
     })
     return JSON.stringify(target)
   }
-  // 统一设置基准地址
-  // config.url = 'http://big-event-vue-api-t.itheima.net' + config.url
-  config.contentType = 'application/json'
-  config.data = format2Json(config.data)
+  
+  // 在发起真正的Ajax之前，统一拼接请求的根路径
+  config.url = 'http://big-event-vue-api-t.itheima.net' + config.url
+
+  // 统一设置请求头
+  config.contentType = 'application/json;charset=utf-8'
+
+  // 统一设置请求的参数 
+  config.data = config.data&& format2Json(config.data)
+  // 统一为有权限的接口，设置headers请求头
+  if (config.url.includes('/my')) {
+    config.headers = {
+      Authorization: localStorage.getItem('token') || ''
+    }
+  }
+
+  //  全局统一挂载complete回调函数
+  config.error = function (err) {
+    
+      // 在complete回调函数中，可以使用res.responseJSON拿到服务器响应回阿里的数据
+      if (err.responseJSON?.code === 1 && err.responseJSON?.message === '身份验证失败！') {
+        // 1.强制清空 token
+        localStorage.removeItem('token')
+        // 2.强制跳转到登录页面
+        localStorage.clear()
+        location.href = '../../login.html'
+      }
+    }
+
+
 })
