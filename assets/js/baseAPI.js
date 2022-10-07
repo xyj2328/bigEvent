@@ -1,44 +1,55 @@
 // 注意每次调用$.get()或$.post()或 $.ajax() 的时候，
 // 会先调用ajaxPerfilter这个函数
 // 在这个函数中，可以拿到我们给ajax提供的配置对象
+// 每次发起真正的请求之后，都会经过的地方
 $.ajaxPrefilter(function (config) {
-  // 将key-value形式的数据，转成json格式
+  // 将key=value形式的数据，转成json格式的字符串
   const format2Json = (source) => {
     let target = {}
     source.split('&').forEach((el) => {
       let kv = el.split('=')
+      // 需要对value进行解码操作
       target[kv[0]] = decodeURIComponent(kv[1])
     })
     return JSON.stringify(target)
   }
-  
-  // 在发起真正的Ajax之前，统一拼接请求的根路径
+
+  // 统一设置基准地址
   config.url = 'http://big-event-vue-api-t.itheima.net' + config.url
 
-  // 统一设置请求头
+  // 统一设置请求头 Content-Type 值
   config.contentType = 'application/json;charset=utf-8'
 
-  // 统一设置请求的参数 
-  config.data = config.data&& format2Json(config.data)
-  // 统一为有权限的接口，设置headers请求头
+  // 统一设置请求的参数 - post 请求
+  config.data = config.data && format2Json(config.data)
+
+  // 统一设置请求头（有条件的添加）
+  // 请求路径中有 /my 这样字符串的需要添加
+  // indexOf startsWith endsWith includes 包含，包括的意思
   if (config.url.includes('/my')) {
+    // 经过调试，headers 属性是自定义的属性
     config.headers = {
-      Authorization: localStorage.getItem('token') || ''
+      Authorization: localStorage.getItem('big_news_token') || ''
     }
   }
 
-  //  全局统一挂载complete回调函数
+  // 统一添加错误回调  或 complete 回调
   config.error = function (err) {
-    
-      // 在complete回调函数中，可以使用res.responseJSON拿到服务器响应回阿里的数据
-      if (err.responseJSON?.code === 1 && err.responseJSON?.message === '身份验证失败！') {
-        // 1.强制清空 token
-        localStorage.removeItem('token')
-        // 2.强制跳转到登录页面
-        localStorage.clear()
-        location.href = '../../login.html'
-      }
+    if (
+      err.responseJSON?.code === 1 &&
+      err.responseJSON?.message === '身份认证失败！'
+    ) {
+      // 进次处的话，可以认为请求有误了
+      localStorage.clear()
+      location.href = '/login.html'
     }
-
-
+  }
 })
+
+/**
+ * 仓库：https://github.com/zlc1000/big_news51.git
+ *
+ * home分支: git add .  -> git commit -m '完成了登录和注册功能' -> git push
+ * git checkout mater -> git merge home -> git push
+ * git checkout -b index -> 再继续开发首页的功能就好了
+ **/

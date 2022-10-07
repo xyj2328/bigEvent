@@ -1,11 +1,14 @@
-html,body {
+html,
+body {
   margin: 0;
   padding: 0;
 }
+
 body {
   background-color: #f2f3f5;
   padding: 10px;
 }
+
 /* 设置卡片主体区域的宽度 */
 .layui-card-body {
   width: 500px;
@@ -66,6 +69,7 @@ body {
   overflow: hidden;
   border-radius: 50%;
 }
+
 #file {
   display: none;
 }
